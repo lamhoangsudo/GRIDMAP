@@ -2,15 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CodeMonkey.Utils;
+using UnityEngine.EventSystems;
+using System;
 
 public class Grid
 {
-    private int width;
-    private int height;
+    public const int HEAT_MAP_MAX_VALUE = 100;
+    public const int HEAT_MAP_MIN_VAULE = 0;
+    public int width { get; private set; }
+    public int height { get; private set; }
     private int[,] gridArray;
     private TextMesh[,] textArray;
-    private float cellSize;
+    public float cellSize { get; private set; }
     private Vector2 statPosition;
+    public class OnGridValueChangeEvent : EventArgs
+    {
+        public int x;
+        public int y;
+    }
+    public event EventHandler<OnGridValueChangeEvent> OnGridChangeValue;
 
     public Grid(int width, int height, float cellSize, Vector2 statPosition)
     {
@@ -34,7 +44,6 @@ public class Grid
                 textArray[i, j] = UtilsClass.CreateWorldText(grid.gridArray[i, j].ToString(), null, GetLocalPosition(i, j) + new Vector2(cellSize, cellSize) * 0.5f, 20, Color.white, TextAnchor.MiddleCenter, TextAlignment.Left);
                 Debug.DrawLine(GetLocalPosition(i, j + 1), GetLocalPosition(i, j), Color.white, 100f);
                 Debug.DrawLine(GetLocalPosition(i + 1, j), GetLocalPosition(i, j), Color.white, 100f);
-                value++;
                 SetValue(i, j, value);
             }
         }
@@ -45,28 +54,75 @@ public class Grid
     {
         return new Vector2(i, j) * cellSize + statPosition;
     }
+    public void GetXY(Vector2 localPosition, out int x, out int y)
+    {
+        localPosition = (localPosition - statPosition) / cellSize;
+        x = Mathf.FloorToInt(localPosition.x);
+        y = Mathf.FloorToInt(localPosition.y);
+    }
     public void SetValue(int i, int j, int value)
     {
         if (i >= 0 && j >= 0 && i < width && j < height)
         {
+            value = Mathf.Clamp(value, HEAT_MAP_MIN_VAULE, HEAT_MAP_MAX_VALUE);
             gridArray[i, j] = value;
             textArray[i, j].text = value.ToString();
+            OnGridChangeValue?.Invoke(this, new OnGridValueChangeEvent { x = i, y = j });
         }
     }
     public void SetValue(Vector2 localPosition, int value)
     {
-        localPosition = (localPosition - statPosition) / cellSize;
-        SetValue(Mathf.FloorToInt(localPosition.x), Mathf.FloorToInt(localPosition.y), value);
-        Debug.Log(localPosition.x.ToString());
-        Debug.Log(localPosition.y.ToString());
+        GetXY(localPosition, out int x, out int y);
+        SetValue(x, y, value);
     }
     public int GetValue(Vector2 localPosition)
     {
-        localPosition = (localPosition - statPosition) / cellSize;
-        if (((int)localPosition.x) >= 0 && ((int)localPosition.y) >= 0 && ((int)localPosition.x) < width && ((int)localPosition.y) < height)
+        GetXY(localPosition, out int x, out int y);
+        return GetValue(x, y);
+    }
+    public int GetValue(int x, int y)
+    {
+        if (x >= 0 && y >= 0 && x < width && y < height)
         {
-            return gridArray[((int)localPosition.x), ((int)localPosition.y)];
+            return gridArray[x, y];
         }
         return 0;
+    }
+    public void AddValue(int x, int y, int value)
+    {
+        SetValue(x, y, GetValue(x, y) + value);
+    }
+    public void AddValue(Vector2 localPosition, int fullValueRange, int totalRange, int value)
+    {
+        int lowerValueAmont = Mathf.RoundToInt((float)value / (totalRange - fullValueRange));
+        GetXY(localPosition, out int xCenter, out int yCenter);
+        //if (xCenter >= 0 && yCenter >= 0 && xCenter < width && yCenter < height)
+        //{
+            for (int x = 0; x < totalRange; x++)
+            {
+                for (int y = 0; y < totalRange - x; y++)
+                {
+                    int radius = x + y;
+                    int addValueAmount = value;
+                    if (radius > fullValueRange)
+                    {
+                        addValueAmount -= lowerValueAmont * (radius - fullValueRange);
+                    }
+                    AddValue(xCenter + x, yCenter + y, addValueAmount);
+                    if (x != 0)
+                    {
+                        AddValue(xCenter - x, yCenter + y, addValueAmount);
+                    }
+                    if (y != 0)
+                    {
+                        AddValue(xCenter + x, yCenter - y, addValueAmount);
+                        if (x != 0)
+                        {
+                            AddValue(xCenter - x, yCenter - y, addValueAmount);
+                        }
+                    }
+                }
+            }
+        //}
     }
 }
