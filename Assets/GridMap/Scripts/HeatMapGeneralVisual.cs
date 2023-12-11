@@ -1,32 +1,33 @@
+using Assets.GridMap.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HeatMapVisual : MonoBehaviour
+public class HeatMapGeneralVisual : MonoBehaviour
 {
-    private Grid<int> grid;
+    private Grid<HeatMapGridObject> grid;
     private Mesh mesh;
     private bool meshUpdate;
 
-    
-    public void SetGrid(Grid<int> grid)
+
+    public void SetGrid(Grid<HeatMapGridObject> grid)
     {
         this.grid = grid;
         UpdateHeatMapVisual();
-        grid.OnGridChangeValue += Grid_OnGridChangeValue;    
+        grid.OnGridChangeValue += Grid_OnGridChangeValue;
     }
 
-    public void Awake()
+    void Awake()
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
     }
 
-    private void Grid_OnGridChangeValue(object sender, Grid<int>.OnGridValueChangeEvent e)
+    private void Grid_OnGridChangeValue(object sender, Grid<HeatMapGridObject>.OnGridValueChangeEvent e)
     {
         meshUpdate = true;
     }
-    public void LateUpdate()
+    void LateUpdate()
     {
         if (meshUpdate)
         {
@@ -43,9 +44,9 @@ public class HeatMapVisual : MonoBehaviour
             {
                 int index = x * grid.height + y;
                 Vector3 baseSize = new Vector3(1, 1) * grid.cellSize;
-                int gridValue = grid.GetGridObject(grid.GetLocalPosition(x,y));
-                float gridVauleNomalize = (float)gridValue / Grid<int>.HEAT_MAP_MAX_VALUE;
-                Vector2 gridVauleUV = new Vector2(gridVauleNomalize, 0f);
+                HeatMapGridObject gridValue = grid.GetGridObject(x,y);
+                float gridVauleNomalize = gridValue.GetValueNormalize();
+                Vector2 gridVauleUV = new(gridVauleNomalize, 0f);
                 MeshUtils.AddToMeshArrays(vertices, uvs, triangles, index, (Vector3)grid.GetLocalPosition(x, y) + baseSize * 0.5f, 0f, baseSize, gridVauleUV, gridVauleUV);
             }
         }
@@ -53,5 +54,4 @@ public class HeatMapVisual : MonoBehaviour
         mesh.uv = uvs;
         mesh.triangles = triangles;
     }
-    
 }
