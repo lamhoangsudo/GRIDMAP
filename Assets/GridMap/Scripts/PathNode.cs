@@ -12,6 +12,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 public class PathNode {
@@ -19,7 +20,6 @@ public class PathNode {
     private Grid<PathNode> grid;
     public int x;
     public int y;
-
     public int gCost;
     public int hCost;
     public int fCost;
@@ -44,7 +44,7 @@ public class PathNode {
     }
 
     public override string ToString() {
-        return x + "," + y;
+        return "";
     }
 
 }

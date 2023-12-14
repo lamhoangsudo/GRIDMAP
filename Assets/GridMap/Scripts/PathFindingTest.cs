@@ -11,9 +11,11 @@ public class PathFindingTest : MonoBehaviour
     private PathfindingVisual pathfindingVisual;
     [SerializeField]
     private PathfindingDebugStepVisual stepVisual;
+    [SerializeField]
+    private int width, height, cellsize;
     private void Start()
     {
-        pathFinding = new(10, 10, 5, Vector2.zero);
+        pathFinding = new(width, height, cellsize, Vector2.zero);
         pathfindingVisual.SetGrid(pathFinding.grid);
         stepVisual.Setup(pathFinding.grid);
     }
@@ -32,7 +34,7 @@ public class PathFindingTest : MonoBehaviour
                         pathFinding.grid.GetLocalPosition(path[i].x, path[i].y).y + pathFinding.grid.cellSize * 0.5f);
                     Vector3 endPoint = new(pathFinding.grid.GetLocalPosition(path[i + 1].x, path[i +1].y).x + pathFinding.grid.cellSize * 0.5f,
                         pathFinding.grid.GetLocalPosition(path[i + 1].x, path[i + 1].y).y + pathFinding.grid.cellSize * 0.5f);
-                    Debug.DrawLine(startPoint, endPoint, Color.red, 100f);
+                    Debug.DrawLine(startPoint, endPoint, Color.red, 10f);
                 }
             }
         }

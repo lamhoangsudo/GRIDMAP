@@ -498,7 +498,7 @@ MonoBehaviour:
   statPosition4: {fileID: 1423771713}
   width: 5
   height: 5
-  cellSize: 10
+  cellSize: 20
   value: 0
   fullValueRange: 0
   totalRange: 0
@@ -534,6 +534,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pathfindingVisual: {fileID: 1086536090}
   stepVisual: {fileID: 1625181787}
+  width: 10
+  height: 10
+  cellsize: 5
 --- !u!1 &1423771712
 GameObject:
   m_ObjectHideFlags: 0

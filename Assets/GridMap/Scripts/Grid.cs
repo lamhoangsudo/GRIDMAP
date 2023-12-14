@@ -59,7 +59,7 @@ public class Grid<TGridObject>
                 textArray[i, j] = UtilsClass.CreateWorldText(grid.gridArray[i, j]?.ToString(), null, GetLocalPosition(i, j) + new Vector2(cellSize, cellSize) * 0.5f, 20, Color.white, TextAnchor.MiddleCenter, TextAlignment.Left);
                 Debug.DrawLine(GetLocalPosition(i, j + 1), GetLocalPosition(i, j), Color.white, 100f);
                 Debug.DrawLine(GetLocalPosition(i + 1, j), GetLocalPosition(i, j), Color.white, 100f);
-                textArray[i,j].text = gridArray[i,j]?.ToString();
+                //textArray[i,j].text = gridArray[i,j]?.ToString();
             }
         }
         Debug.DrawLine(GetLocalPosition(0, height), GetLocalPosition(width, height), Color.white, 100f);

@@ -27,7 +27,7 @@ public class PathFinding
             for (int j = 0; j < grid.height; j++)
             {
                 PathNode pathNode = grid.GetGridObject(i, j);
-                pathNode.gCost = int.MaxValue;
+                pathNode.gCost = 9999;
                 pathNode.CalculateFCost();
                 pathNode.cameFromNode = null;
             }

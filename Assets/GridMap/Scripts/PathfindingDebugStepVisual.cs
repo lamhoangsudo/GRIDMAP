@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using CodeMonkey.Utils;
+using Unity.VisualScripting;
 
 public class PathfindingDebugStepVisual : MonoBehaviour {
 
@@ -26,7 +27,8 @@ public class PathfindingDebugStepVisual : MonoBehaviour {
     private List<GridSnapshotAction> gridSnapshotActionList;
     private bool autoShowSnapshots;
     private float autoShowSnapshotsTimer;
-    private Transform[,] visualNodeArray; 
+    private Transform[,] visualNodeArray;
+    private float size;
 
     private void Awake() {
         Instance = this;
@@ -36,10 +38,10 @@ public class PathfindingDebugStepVisual : MonoBehaviour {
 
     public void Setup(Grid<PathNode> grid) {
         visualNodeArray = new Transform[grid.width, grid.height];
-
+        size = grid.cellSize;
         for (int x = 0; x < grid.width; x++) {
             for (int y = 0; y < grid.height; y++) {
-                Vector3 gridPosition = new Vector3(x, y) * grid.cellSize + Vector3.one * grid.cellSize * .5f;
+                Vector3 gridPosition = new(grid.GetLocalPosition(x, y).x + grid.cellSize * 0.5f, grid.GetLocalPosition(x, y).y + grid.cellSize * 0.5f);
                 Transform visualNode = CreateVisualNode(gridPosition);
                 visualNodeArray[x, y] = visualNode;
                 visualNodeList.Add(visualNode);
@@ -93,7 +95,6 @@ public class PathfindingDebugStepVisual : MonoBehaviour {
                 int gCost = pathNode.gCost;
                 int hCost = pathNode.hCost;
                 int fCost = pathNode.fCost;
-                Vector3 gridPosition = new Vector3(pathNode.x, pathNode.y) * grid.cellSize + Vector3.one * grid.cellSize * .5f;
                 bool isCurrent = pathNode == current;
                 bool isInOpenList = openList.Contains(pathNode);
                 bool isInClosedList = closedList.Contains(pathNode);
@@ -135,7 +136,6 @@ public class PathfindingDebugStepVisual : MonoBehaviour {
                 int gCost = pathNode.gCost;
                 int hCost = pathNode.hCost;
                 int fCost = pathNode.fCost;
-                Vector3 gridPosition = new Vector3(pathNode.x, pathNode.y) * grid.cellSize + Vector3.one * grid.cellSize * .5f;
                 bool isInPath = path.Contains(pathNode);
                 int tmpX = x;
                 int tmpY = y;
@@ -172,14 +172,16 @@ public class PathfindingDebugStepVisual : MonoBehaviour {
     }
 
     private void SetupVisualNode(Transform visualNodeTransform, int gCost, int hCost, int fCost) {
+        float nomalize = size / visualNodeTransform.Find("sprite").localScale.x;
+        visualNodeTransform.localScale = new Vector3 (nomalize, nomalize, 1f);
         if (fCost < 1000) {
             visualNodeTransform.Find("gCostText").GetComponent<TextMeshPro>().SetText(gCost.ToString());
             visualNodeTransform.Find("hCostText").GetComponent<TextMeshPro>().SetText(hCost.ToString());
             visualNodeTransform.Find("fCostText").GetComponent<TextMeshPro>().SetText(fCost.ToString());
         } else {
-            visualNodeTransform.Find("gCostText").GetComponent<TextMeshPro>().SetText("");
-            visualNodeTransform.Find("hCostText").GetComponent<TextMeshPro>().SetText("");
-            visualNodeTransform.Find("fCostText").GetComponent<TextMeshPro>().SetText("");
+            visualNodeTransform.Find("gCostText").GetComponent<TextMeshPro>().SetText("0");
+            visualNodeTransform.Find("hCostText").GetComponent<TextMeshPro>().SetText("0");
+            visualNodeTransform.Find("fCostText").GetComponent<TextMeshPro>().SetText("0");
         }
     }
 
